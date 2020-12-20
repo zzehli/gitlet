@@ -1,7 +1,6 @@
 .DS_Store
 sentinel
 __pycache__
-
 # Created by https://www.gitignore.io/api/java,eclipse,intellij,emacs,vim
 
 ### Java ###
