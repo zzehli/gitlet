@@ -444,7 +444,6 @@ if __name__ == "__main__":
         else:
             lib_dir = join((abspath(getcwd())),
                       "library-su20/javalib")
-    #join(abspath(getcwd()), abspath(lib_dir))
     except GetoptError:
         Usage()
     if not files:
