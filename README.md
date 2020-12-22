@@ -1,8 +1,49 @@
 # gitlet
 This is an independant implementation of a mini version of Git. The project skeleton is provided by Berkeley CS61B course
 
+## Design
+| Class: gitApi | Comments |
+| ----- |-----|
+| init() ||
+| add(String filename) |create blobs but don't save to file|
+| rm (String filename) | unstage files |
+| commit(String message) | compare blobs and save new ones to file|
+| log () ||
+| ... ||
+| private head||
+| private master ||
+| private HashMap(filename, ) stage  | this can be a set|
+
+
+| Class: Object | Comments |
+| ----- |-----|
+| makeBlob(String filename) ||
+| makeCommit() ||
+| typeOf(String hash)| return wether the given hash refers to blob or commits|
+| String parentBlob() | go to the parent commit and find the corresponding blob and return its hash |
+| findParentCommit(String hash) | take the hash of the current commit and find its parent |
+| compareBlob(String parentHash) ||
+
+| Class: File | Comments |
+| ---- | ------|
+| File getBlob(String hash) |this is necessary since commits share blobs|
+| boolean stageFile() | note that file added is not stored permanently, it can be override by new add if the same file changed | 
+|  
+
+| Class: Utils (ignore provided functions) | Comments |
+| ---- | ----- |
+| String getTime() | for timestamp objects at the time of adding |
+
+
+
+
+
+
+
+| Class: 
 ## Development Journal
-Day 1: Dec 21st, set up the project as an stand-alone repo and started the design process. The decision to extract the project from the CS61B course repo means I need to fix git issues and directory references. I added the submodule to the project folder. Dealing with submodules allow me to practice with the remote repos, which I will probably implement if the project goes well. Another problem was fixing the python test suit that contains the default library directory for the course. In the evening, I spent time reading the project prompt and read materials about git implementations. I am surprised by the number of expositions on this subject matter. There are quite a few git implementations and helpful expositories as well as conference talks. In particular, I figured out an important question: **what are the snapshots of the files added/commited?** For text files, simply save the whole file as a string. This a lot more simpler/unsophisticated than I have imagined. However, this only applies to txt file. This is really not much different from copy and paste. The disk space required for other format would be considerably larger if other file format are involved. 
+### Day 1: Dec 20st
+Set up the project as an stand-alone repo and started the design process. The decision to extract the project from the CS61B course repo means I need to fix git issues and directory references. I added the submodule to the project folder. Dealing with submodules allow me to practice with the remote repos, which I will probably implement if the project goes well. Another problem was fixing the python test suit that contains the default library directory for the course. In the evening, I spent time reading the project prompt and read materials about git implementations. I am surprised by the number of expositions on this subject matter. There are quite a few git implementations and helpful expositories as well as conference talks. In particular, I figured out an important question: **what actually are the snapshots of the files when you add/commit?** For text files, simply save the whole file as a string, which is in turn saved to `.git/object` folder when commited. This a lot more simpler/unsophisticated than I have imagined. However, this only applies to txt file. This is really not much different from copy and paste. The disk space required for other format would be considerably larger if other file format are involved. 
 
 The [naive version control workflow](http://git.github.io/git-reference/) provided by the github team illustrate what Github really is
 ```
@@ -17,7 +58,8 @@ cd project-my-copy
 diff project-my-copy project.2010-06-01 > change.patch
 (email change.patch)
 ```
-Day 2: Dec 22nd, leart about JAVA file I/O and serialization. At this point, I am more or less ready to start writing the code. I have a fairly good understanding of the structure of git. The constraints set up by the project author makes the git implementation very workable. A few important points of implementations are:
+### Day 2: Dec 21nd
+Leart about JAVA file I/O and serialization. At this point, I am more or less ready to start writing the code. I have a fairly good understanding of the structure of git. **The constraints set up by the this project** makes the git implementation very workable. A few important points of implementations are:
 * There are three data structures in git: blobs, trees and commits; **gitlet eliminates trees**. Trees are essential subdirectories that are represented by a pointer like structure. In the current directory, instead of a thing called "folder" in the git representation, you have a tree. This allows subdirectories to be defined in a recursive manner. In the following example, the `main` branch contains two subtrees, or two subdirectories, gitlet and testing. Reading the content of the gitlet subtree is equivalent to looking inside the directory. Git essentially coated files and subdirectories with different names, blob and trees. Also, notice the `commit` file that is a submodule.
 ```
 homer@DESKTOP-QC9AG5L:/mnt/c/Users/homer/Documents/project/gitlet (main)$ git cat-file -p main^{tree}
@@ -39,3 +81,4 @@ homer@DESKTOP-QC9AG5L:/mnt/c/Users/homer/Documents/project/gitlet (main)$ git ca
 * File I/O functions are provided by the skeleton file.
 * Only support text files, therefore taking snapshots basically means taking the snapshot is very similar to saving the file as a string. There is not much to be puzzled over here about compression etc.
 
+### Day 3: Dec 22rd
