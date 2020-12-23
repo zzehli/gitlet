@@ -1,6 +1,7 @@
 # gitlet
 This is an independant implementation of a mini version of Git. The project skeleton is provided by Berkeley CS61B course
-
+## Define terms:
+**working directory**: directory in the git inialized
 ## Design
 | Class: gitApi | Comments |
 | ----- |-----|
@@ -15,10 +16,10 @@ This is an independant implementation of a mini version of Git. The project skel
 | private HashMap(filename, ) stage  | this can be a set|
 
 
-| Class: Object | Comments |
+| Class: object | Comments |
 | ----- |-----|
 | makeBlob(String filename) ||
-| makeCommit() ||
+| makeCommit() | call write commit |
 | typeOf(String hash)| return wether the given hash refers to blob or commits|
 | String parentBlob() | go to the parent commit and find the corresponding blob and return its hash |
 | findParentCommit(String hash) | take the hash of the current commit and find its parent |
@@ -26,18 +27,20 @@ This is an independant implementation of a mini version of Git. The project skel
 
 | Class: File | Comments |
 | ---- | ------|
+| initSetUp() | set up .git folder, .git/object folder, .git/HEAD file, git/index file |
 | File getBlob(String hash) |this is necessary since commits share blobs|
-| boolean stageFile() | note that file added is not stored permanently, it can be override by new add if the same file changed | 
-|  
+| boolean stageFile() | write staged file for later commits; note that file added is not stored permanently, unlike commit, it can be overriden by new add if the same file changed | 
+| writeCommit() | create commit folder in the .git/object folder and name it as SHA-1 hash; save new blobs inside the commit folder |
+| File getCommit(String hash) | look fore the commit folder with the hash code as file name |
+| String notInitized() | check if the current directory is initialized by gitlet |
+
+| Class: Index | Comments |
+| 
 
 | Class: Utils (ignore provided functions) | Comments |
 | ---- | ----- |
 | String getTime() | for timestamp objects at the time of adding |
-
-
-
-
-
+| String getFileName() | for easy access to commits | 
 
 
 | Class: 
@@ -58,6 +61,8 @@ cd project-my-copy
 diff project-my-copy project.2010-06-01 > change.patch
 (email change.patch)
 ```
+
+
 ### Day 2: Dec 21nd
 Leart about JAVA file I/O and serialization. At this point, I am more or less ready to start writing the code. I have a fairly good understanding of the structure of git. **The constraints set up by the this project** makes the git implementation very workable. A few important points of implementations are:
 * There are three data structures in git: blobs, trees and commits; **gitlet eliminates trees**. Trees are essential subdirectories that are represented by a pointer like structure. In the current directory, instead of a thing called "folder" in the git representation, you have a tree. This allows subdirectories to be defined in a recursive manner. In the following example, the `main` branch contains two subtrees, or two subdirectories, gitlet and testing. Reading the content of the gitlet subtree is equivalent to looking inside the directory. Git essentially coated files and subdirectories with different names, blob and trees. Also, notice the `commit` file that is a submodule.
@@ -82,3 +87,10 @@ homer@DESKTOP-QC9AG5L:/mnt/c/Users/homer/Documents/project/gitlet (main)$ git ca
 * Only support text files, therefore taking snapshots basically means taking the snapshot is very similar to saving the file as a string. There is not much to be puzzled over here about compression etc.
 
 ### Day 3: Dec 22rd
+An important concept in the project is persistence, since after every run of the git/gitlet command, the program is closed, the results of the command need to be stored to hard drive. Most of the files generated are for the program to use in the future, but some will be available to users such as the files in the working directories commited. Unlike other programs that you assume will run continuously between one command and the next, git only execute one program at a time. Therefore, it is costly to reestablish the working environment when the program starts again, therefore the persistence set up needs to be efficient. And efficiency in persistence comes from how many times the program needs to read from different files. **Therefore how to store internal objects to files(file organization and content of files) and restore them is the central design question.**
+
+Two problems stands out: **how to store the vertical history (`git log` for a list of commits) and the horizontal history (`git ls-files`, fow which `git status` is a simplified version of)?** These two are maps (in a literal, not programming sense) for both the program and the client to navigate their actions. The vertical history is stored in the `.git/ref` folder and the horizontal history is in the `.git/index` file. My goal tomorrow is to figure out how `.git/ref` work and finish the development doc in the morning and start coding in the afternoon. 
+
+An more straight forward way to implement file system is to create separate folders for seperate commands such as `objects/commits` for commit history and `objects/stage` for staged blobs, etc. However, this implementation will make file navigation difficult to keep track of by the programmer, since files are essentially regarded as command specific. But as the number of commands increase, finding files might become a problem.
+
+Two of the most important reference I use so far are the Pro Git book [chapter 10](https://git-scm.com/book/en/v2/Git-Internals-Git-References) section 2 and 3 and [mini Git implementation walkthrough](https://maryrosecook.com/blog/post/git-from-the-inside-out) by Mary Rose Cook.
