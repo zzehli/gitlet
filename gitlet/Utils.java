@@ -14,9 +14,12 @@ import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Formatter;
 import java.util.List;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 
 /** Assorted utilities.
@@ -28,6 +31,16 @@ class Utils {
 
     /** The length of a complete SHA-1 UID as a hexadecimal numeral. */
     static final int UID_LENGTH = 40;
+
+    /** Get the current time as string */
+    static String timeStamp() {
+        return LocalDateTime.now().toString();
+    }
+
+    /** hash serialized gitObjects */
+    static String hash(Serializable gitObj) {
+        return sha1(serialize(gitObj));
+    }
 
     /** Returns the SHA-1 hash of the concatenation of VALS, which may
      *  be any mixture of byte arrays and Strings. */
@@ -128,6 +141,7 @@ class Utils {
             }
             str.close();
         } catch (IOException | ClassCastException excp) {
+            excp.printStackTrace();
             throw new IllegalArgumentException(excp.getMessage());
         }
     }
