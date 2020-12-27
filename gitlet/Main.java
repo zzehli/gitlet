@@ -1,5 +1,6 @@
 package gitlet;
 
+import java.io.File;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -8,26 +9,44 @@ import java.time.ZoneOffset;
  *  @author
  */
 public class Main {
+    static final File HEAD = Utils.join(".gitlet", "HEAD");
 
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND> .... */
     public static void main(String[] args) {
         // FILL THIS IN
         if (args.length == 0) {
-           exitWithError("No argument provided. Exit the program");
+           Utils.exitWithError("No argument provided. Exit the program");
         }
 
         switch (args[0]) {
             case "init":
                 validateNumArgs("init", args, 1);
+                if (Utils.join(".gitlet").exists()) {
+                    Utils.exitWithError("A Gitlet version-control system " +
+                            "already exists in the current directory.");
+                }
                 Command.init();
-                //System.out.println(Utils.sha1("fish", "kids", "heree"));
                 break;
+
+
             case "add":
                 validateNumArgs("add", args, 2);
+                if (Utils.join(args[1]).exists() == false) {
+                    Utils.exitWithError("File does not exist.");
+                }
                 Command.add(args[1]);
+                break;
+
+            case "commit":
+                if (args.length != 2) {
+                    Utils.exitWithError("Please enter a commit message.");
+                }
+                Command.commit(args[1]);
+                break;
+
             default:
-                exitWithError(String.format("Unknown command: %s", args[0]));
+                Utils.exitWithError(String.format("Unknown command: %s", args[0]));
         }
         return;
     }
@@ -44,26 +63,9 @@ public class Main {
     public static void validateNumArgs(String cmd, String[] args, int n) {
         if (args.length != n) {
             throw new RuntimeException(
+
                     String.format("Invalid number of arguments for: %s.", cmd));
         }
     }
-
-    /**
-     * Prints out MESSAGE and exits with error code -1.
-     * Note:
-     *     The functionality for erroring/exit codes is different within Gitlet
-     *     so DO NOT use this as a reference.
-     *     Refer to the spec for more information.
-     *
-     * @ref su2020 lab09
-     * @param message message to print
-     */
-    public static void exitWithError(String message) {
-        if (message != null && !message.equals("")) {
-            System.out.println(message);
-        }
-        System.exit(0);
-    }
-
 
 }

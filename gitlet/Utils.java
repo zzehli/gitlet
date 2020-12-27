@@ -33,11 +33,13 @@ class Utils {
     static final int UID_LENGTH = 40;
 
     /** Get the current time as string */
+    //@author Z.L.
     static String timeStamp() {
         return LocalDateTime.now().toString();
     }
 
     /** hash serialized gitObjects */
+    //@author Z.L.
     static String hash(Serializable gitObj) {
         return sha1(serialize(gitObj));
     }
@@ -119,6 +121,24 @@ class Utils {
     static String readContentsAsString(File file) {
         return new String(readContents(file), StandardCharsets.UTF_8);
     }
+
+    /**
+     * Prints out MESSAGE and exits with error code -1.
+     * Note:
+     *     The functionality for erroring/exit codes is different within Gitlet
+     *     so DO NOT use this as a reference.
+     *     Refer to the spec for more information.
+     *
+     * @ref su2020 lab09
+     * @param message message to print
+     */
+    public static void exitWithError(String message) {
+        if (message != null && !message.equals("")) {
+            System.out.println(message);
+        }
+        System.exit(0);
+    }
+
 
     /** Write the result of concatenating the bytes in CONTENTS to FILE,
      *  creating or overwriting it as needed.  Each object in CONTENTS may be
