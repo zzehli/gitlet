@@ -3,20 +3,20 @@ package gitlet;
 import java.io.File;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 /** Driver class for Gitlet, the tiny stupid version-control system.
  *  @author
  */
 public class Main {
-    static final File HEAD = Utils.join(".gitlet", "HEAD");
 
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND> .... */
     public static void main(String[] args) {
-        // FILL THIS IN
         if (args.length == 0) {
-           Utils.exitWithError("No argument provided. Exit the program");
+           Utils.exitWithError("Please enter a command.");
         }
 
         switch (args[0]) {
@@ -45,8 +45,43 @@ public class Main {
                 Command.commit(args[1]);
                 break;
 
+            case "rm":
+                validateNumArgs("rm", args, 2);
+                Command.rm(args[1]);
+                break;
+
+            case "log":
+                validateNumArgs("log", args, 1);
+                Command.log();
+                break;
+
+            case "status":
+                validateNumArgs("status", args, 1);
+                Command.status();
+                break;
+
+            case "branch":
+                validateNumArgs("branch", args, 2);
+                Command.branch(args[1]);
+                break;
+
+            case "checkout":
+                //TODO slash slash
+                if (args.length == 3) {
+                    Command.branchPastFile(args[1], args[2]);
+                } else if (args.length == 2) {
+                    //if args[1] is a branch
+                        Command.branchSwitch(args[1]);
+                    //else if args[1] is in head commit
+                        Command.branchHeadFile(args[1]);
+                } else {
+                    Utils.exitWithError("Not valid input.");
+                }
+
+
             default:
-                Utils.exitWithError(String.format("Unknown command: %s", args[0]));
+                Utils.exitWithError("No command with that name exists.");
+
         }
         return;
     }

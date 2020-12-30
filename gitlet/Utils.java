@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Formatter;
@@ -35,7 +36,9 @@ class Utils {
     /** Get the current time as string */
     //@author Z.L.
     static String timeStamp() {
-        return LocalDateTime.now().toString();
+//        return LocalDateTime.now().toString();
+        return ZonedDateTime.now().format(
+                DateTimeFormatter.ofPattern("EEE MMM d kk:mm:ss uuuu xxxx"));
     }
 
     /** hash serialized gitObjects */

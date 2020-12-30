@@ -22,8 +22,6 @@ public class Gitindex implements Serializable {
         return sha1Hash;
     }
 
-    public void setSha1Hash(String hash) { sha1Hash = hash; }
-
     public String getFilename() { return filename; }
 
 

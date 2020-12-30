@@ -1,7 +1,7 @@
 import sys, re
 from subprocess import \
      check_output, PIPE, STDOUT, DEVNULL, CalledProcessError, TimeoutExpired
-from os.path import abspath, basename, dirname, exists, join, splitext, isdir
+from os.path import abspath, basename, dirname, exists, join, splitext, isdir, isfile
 from getopt import getopt, GetoptError
 from os import chdir, environ, getcwd, mkdir, remove
 from shutil import copyfile, rmtree
@@ -10,6 +10,7 @@ from glob import glob
 
 SHORT_USAGE = """\
 Usage: python3 tester.py OPTIONS TEST.in ...
+
    OPTIONS may include
        --show=N       Show details on up to N tests.
        --show=all     Show details on all tests.
@@ -440,10 +441,10 @@ if __name__ == "__main__":
                 TIMEOUT = 100000
         if lib_dir is None:
             lib_dir = join(dirname(abspath(getcwd())),
-                      "library-su20/javalib")
-        else:
-            lib_dir = join((abspath(getcwd())),
-                      "library-su20/javalib")
+                      "library-su20", "javalib")
+        # else:
+        #     lib_dir = join((abspath(getcwd())),
+        #               "library-su20/javalib")
     except GetoptError:
         Usage()
     if not files:

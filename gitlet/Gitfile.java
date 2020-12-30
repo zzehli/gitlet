@@ -3,14 +3,20 @@ import jdk.jshell.execution.Util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeSet;
 
 public class Gitfile{
     static final File OBJECTS = new File(".gitlet/objects");
     static final File INDEX = Utils.join(".gitlet", "INDEX");
+    static final File INDEX_RM = Utils.join(".gitlet", "INDEX_RM");
+    static final File LOCAL_HEAD = Utils.join(".gitlet", "refs", "heads");
     static final File HEAD = Utils.join(".gitlet", "HEAD");
+    static final String ST_RM = "REMOTE";
 
     /**
      * set up dog gitlet folder and subfolders
@@ -18,7 +24,9 @@ public class Gitfile{
     static void setDirectory() {
         OBJECTS.mkdirs();
         //this is for branching
-        Utils.join(".gitlet", "refs", "heads").mkdirs();
+        LOCAL_HEAD.mkdirs();
+        Objects index = new Objects("index");
+        Utils.writeObject(INDEX_RM, index);
     }
 
     /**
@@ -32,13 +40,12 @@ public class Gitfile{
         java.io.File file = getObjectsAsFile(hash);
         if (GitObject.getType().equals("commit")) {
             //point head pointer to current head
-            writeHead(hash);
-            updateBranchHead(hash);
+            writeHead("master");
+            updateBranchHead("master", hash);
             Utils.writeObject(file, GitObject);
         }
         //handle blob
         else {
-            //TODO move this function to command
             if (writeStagedToIndex(hash, GitObject.getCwdName())) {
                 //if need to stage, store staged file to objects folder
                 Utils.writeObject(file, GitObject);
@@ -47,28 +54,31 @@ public class Gitfile{
     }
 
     /**
-     * write the current head pointer location in .gitlet/HEAD file
-     * @param hash
+     * write the current head pointer as path to location in .gitlet/HEAD file
+     * @param branch name of the branch
      */
-    static void writeHead(String hash) {
-        Utils.writeContents(HEAD, hash);
+    static void writeHead(String branch) {
+        Utils.writeContents(HEAD, branch);
     }
 
     /**
-     * get current HEAD commit as a string
+     * get current HEAD commit hash as a string
      * @return hash of the current commit/HEAD
      */
     static String getHead() {
-        return Utils.readContentsAsString(Gitfile.HEAD);
+        String curr = Utils.readContentsAsString(HEAD);
+        File branchHead = Utils.join(LOCAL_HEAD, curr);
+        return Utils.readContentsAsString(branchHead);
     }
 
     /**
      * a helper function for writeObject
-     * write branch head in .gitlet/refs/heads
-     * @param hash
+     * write local branch head in .gitlet/refs/heads
+     * @param hash hash of newest commit
+     * @param branch branch to update
      */
-    static void updateBranchHead(String hash) {
-        File branchHead = Utils.join(".gitlet", "refs", "heads", "master");
+    static void updateBranchHead(String branch, String hash) {
+        File branchHead = Utils.join(".gitlet", "refs", "heads", branch);
         Utils.writeContents(branchHead, hash);
     }
 
@@ -110,6 +120,46 @@ public class Gitfile{
     }
 
     /**
+     * perform removal action, either update INDEX file or create entry in
+     * INDEX_RM file and perform deletion
+     * @param blobRmv file to be removed from gitlet system
+     * @return false if no action performed
+     */
+    static boolean updateIndexRemoval(Objects blobRmv) {
+        String hashCode = Utils.hash(blobRmv);
+        //read from staging area
+        Objects stageEntries = Utils.readObject(INDEX, Objects.class);
+        //read from current commit
+        File head = Gitfile.getObjectsAsFile(Gitfile.getHead());
+        Objects currHeads = Utils.readObject(head, Objects.class);
+        if (!stageEntries.indexFile.isEmpty()
+                && stageEntries.indexFile.containsKey(blobRmv.getCwdName())) {
+            //Utils.restrictedDelete(file);
+            stageEntries.indexFile.remove(blobRmv.getCwdName());
+            Utils.writeObject(INDEX, stageEntries);
+            return true;
+        } else if (!currHeads.indexFile.isEmpty()
+                && currHeads.indexFile.containsKey(blobRmv.getCwdName())) {
+            //if current commit contain the file and stage doesn't, write it to INDEX_RM
+            //delete from repo
+            Utils.restrictedDelete(new File(blobRmv.getCwdName()));
+            //create INDEX object for writing
+            Objects removalStaged;
+            //write RM file
+            //read from stage remove
+            removalStaged = Utils.readObject(INDEX_RM, Objects.class);
+            if (removalStaged == null) {
+                removalStaged = new Objects("index");
+            }
+            Gitindex entry = new Gitindex(hashCode, blobRmv.getCwdName());
+            removalStaged.indexFile.put(blobRmv.getCwdName(), entry);
+            Utils.writeObject(INDEX_RM, removalStaged);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Helper function to get a Blob/Commit object with hash
      * @param hash hashcode of the Objects
      * @return corresponding file, might not exist
@@ -130,6 +180,26 @@ public class Gitfile{
     static String getHashBody(String hash) {
         return hash.substring(2);
     }
+
+    /**
+     * Given a file of Objects class, read its Hash Map and return a sorted list
+     * of keys(cwd names) in the file index
+     * @param index commit/index file contain hash map
+     * @return sorted list of filename strings
+     */
+    static String[] collectCwdNamesfromIndex(File index) {
+        Objects list = Utils.readObject(index, Objects.class);
+        String[] output = new String[list.indexFile.size()];
+        int i = 0;
+        for (String e : list.indexFile.keySet()) {
+            output[i++] = e;
+        }
+        Arrays.sort(output);
+        return output;
+    }
+
+//    static String getBranchHead(String branchName) {
+//    }
 
 
 }
