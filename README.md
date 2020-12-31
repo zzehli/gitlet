@@ -183,3 +183,5 @@ a1
 ```
 Three files are created, a commit object (9d91c), a tree for the sample folder (319d) and another tree for its subdirectory `data` folder (1637).
 
+### Dec 30th
+I am working on branching and merging now. The development process has been smooth so far. I took two days off during the weekend. 

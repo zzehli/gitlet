@@ -68,10 +68,12 @@ public class Objects implements Serializable {
         return CwdName;
     }
 
+    public String getContent() { return content;}
+
     /**
-     * Get the hash of the parent of the original track
+     * Get the hash of the first parent,
      * later merged in parents are later down the line
-     * @return
+     * @return hash of the parent commit
      */
     public String getParentHash() {
         if (parentHash.isEmpty()) {

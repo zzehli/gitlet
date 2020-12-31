@@ -67,17 +67,19 @@ public class Main {
 
             case "checkout":
                 //TODO slash slash
-                if (args.length == 3) {
-                    Command.branchPastFile(args[1], args[2]);
-                } else if (args.length == 2) {
-                    //if args[1] is a branch
-                        Command.branchSwitch(args[1]);
-                    //else if args[1] is in head commit
-                        Command.branchHeadFile(args[1]);
-                } else {
+                if (args.length == 4) {
+                    Command.checkoutPastFile(args[1], args[3]);
+                }
+                else if (args.length == 3) {
+                    Command.checkoutHeadFile(args[2]);
+                }
+                else if (args.length == 2) {
+                    Command.checkoutBranch(args[1]);
+                }
+                else {
                     Utils.exitWithError("Not valid input.");
                 }
-
+                break;
 
             default:
                 Utils.exitWithError("No command with that name exists.");

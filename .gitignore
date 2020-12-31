@@ -4,7 +4,7 @@ __pycache__
 # Created by https://www.gitignore.io/api/java,eclipse,intellij,emacs,vim
 
 ### Project Specific ###
-.gitlet/.
+.gitlet/
 
 ### Java ###
 *.class
