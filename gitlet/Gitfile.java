@@ -2,19 +2,15 @@ package gitlet;
 import jdk.jshell.execution.Util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.*;
 
-public class Gitfile{
-    static final File OBJECTS = new File(".gitlet/objects");
+public class Gitfile {
+    static final File OBJECTS = Utils.join(".gitlet","objects");
     static final File INDEX = Utils.join(".gitlet", "INDEX");
     static final File INDEX_RM = Utils.join(".gitlet", "INDEX_RM");
     static final File LOCAL_HEAD = Utils.join(".gitlet", "refs", "heads");
     static final File HEAD = Utils.join(".gitlet", "HEAD");
     static final File BRANCH = Utils.join(".gitlet", "refs", "heads");
-    static final File LOG_REF = Utils.join(".gitlet", "logs", "refs", "heads");
     static final File CWD = Utils.join(".");
     static final String ST_RM = "REMOTE";
 
@@ -25,7 +21,6 @@ public class Gitfile{
         OBJECTS.mkdirs();
         //this is for branching
         LOCAL_HEAD.mkdirs();
-        LOG_REF.mkdirs();
         Objects index = new Objects("index");
         Utils.writeObject(INDEX_RM, index);
         Utils.writeContents(HEAD, "master");
@@ -33,6 +28,7 @@ public class Gitfile{
 
     /**
      * write the commit object to .gitlet/objects/
+     *
      * @param GitObject
      */
     static void writeGitObject(Objects GitObject) {
@@ -43,7 +39,6 @@ public class Gitfile{
         if (GitObject.getType().equals("commit")) {
             //point head pointer to current head
             String currBranch = Utils.readContentsAsString(HEAD);
-            System.out.println(currBranch);
             writeHead(currBranch);
             updateBranchHead(currBranch, hash);
             Utils.writeObject(file, GitObject);
@@ -59,6 +54,7 @@ public class Gitfile{
 
     /**
      * update the branch name of the head pointer in .gitlet/HEAD file
+     *
      * @param branch name of the branch
      */
     static void writeHead(String branch) {
@@ -67,6 +63,7 @@ public class Gitfile{
 
     /**
      * get current HEAD commit hash as a string
+     *
      * @return hash of the current commit/HEAD
      */
     static String getHead() {
@@ -77,7 +74,8 @@ public class Gitfile{
 
     /**
      * write git INDEX file to record staged file
-     * @param hash sha1 of the staged file
+     *
+     * @param hash     sha1 of the staged file
      * @param filename filename of the stage file in the CWD
      * @return true if write to index
      */
@@ -98,7 +96,7 @@ public class Gitfile{
 
             }
             //write update to file
-            Gitindex update = new Gitindex(hash,filename);
+            Gitindex update = new Gitindex(hash, filename);
             fileList.indexFile.put(filename, update);
 
             //fileList.printDict();
@@ -109,13 +107,14 @@ public class Gitfile{
         }
 
         Utils.writeObject(INDEX, fileList);
-    return true;
+        return true;
     }
 
     /**
      * helper function
      * perform removal action, either update INDEX file or create entry in
      * INDEX_RM file and perform deletion
+     *
      * @param blobRmv file to be removed from gitlet system
      * @return false if no action performed
      */
@@ -155,6 +154,7 @@ public class Gitfile{
 
     /**
      * Helper function to get a Blob/Commit object with hash
+     *
      * @param hash hashcode of the Objects
      * @return corresponding file, might not exist
      */
@@ -164,7 +164,19 @@ public class Gitfile{
     }
 
     /**
+     * Given hash of an git object, return the object from repo
+     *
+     * @param hash
+     * @return Objects class of the git object
+     */
+    static Objects getObjectsfromHash(String hash) {
+        File obj = getObjectsAsFile(hash);
+        return Utils.readObject(obj, Objects.class);
+    }
+
+    /**
      * Getter for hash code, used for naming things
+     *
      * @return
      */
     static String getHashHead(String hash) {
@@ -176,42 +188,29 @@ public class Gitfile{
     }
 
     /**
-     * Given a file of Objects class, read its Hash Map and return a sorted list
-     * of keys(cwd names) in the file index
-     * @param index commit/index file contain hash map
-     * @return sorted list of filename strings
-     */
-    static String[] collectCwdNamesfromIndex(File index) {
-        Objects list = Utils.readObject(index, Objects.class);
-        String[] output = new String[list.indexFile.size()];
-        int i = 0;
-        for (String e : list.indexFile.keySet()) {
-            output[i++] = e;
-        }
-        Arrays.sort(output);
-        return output;
-    }
-
-    /**
      * Get current commit as Objects
+     *
      * @return
      */
     static Objects getCurrentCommit() {
         File commit = getObjectsAsFile(Gitfile.getHead());
         return Utils.readObject(commit, Objects.class);
     }
+
     /**
      * get the current hash of the given branch
+     *
      * @param branchName
      * @return
      */
     static String getBranchHead(String branchName) {
-        File head = Utils.join(LOCAL_HEAD, currentBranch());
+        File head = Utils.join(LOCAL_HEAD, branchName);
         return Utils.readContentsAsString(head);
     }
 
     /**
      * return the name (not hash) of the current branch
+     *
      * @return
      */
     static String currentBranch() {
@@ -220,7 +219,8 @@ public class Gitfile{
 
     /**
      * write local branch head in .gitlet/refs/heads
-     * @param hash hash of newest commit
+     *
+     * @param hash   hash of newest commit
      * @param branch branch to update
      */
     static void updateBranchHead(String branch, String hash) {
@@ -229,25 +229,67 @@ public class Gitfile{
     }
 
     /**
-     * Get the ancestor commit hash as a list of the given branch
+     * Get the ancestor commits hash as a list (including merged in branches)
+     *
      * @param currBranch branch to be retrieved
      * @return list of commit hash
      */
     static List<String> pastCommits(String currBranch) {
         //get head commit of this branch
         String hash = Utils.readContentsAsString(Utils.join(BRANCH, currBranch));
-        Objects currCommit = Utils.readObject(Gitfile.getObjectsAsFile(hash), Objects.class);
-        if (!currCommit.getType().equals("commit")) {
-            Utils.exitWithError("Not a commit type");
-        }
-        List<String> ret = new LinkedList<>();
-        String commitHash = hash;
-        while (!currCommit.getParentHash().equals("")) {
-            ret.add(commitHash);
-            commitHash = currCommit.getParentHash();
-            currCommit = Utils.readObject(Gitfile.getObjectsAsFile(currCommit.getParentHash()), Objects.class);
+        //TODO might be a problem to return List
+        List<String> ret = new ArrayList<>();
+        ret.add(hash);
+        LinkedList<String> queue = new LinkedList<>();
+        queue.add(hash);
+        while (!queue.isEmpty()) {
+            String commitHash = queue.pop();
+            Objects currCommit = Gitfile.getObjectsfromHash(commitHash);
+            if (!currCommit.getSecondParent().equals("")) {
+                ret.add(currCommit.getSecondParent());
+                queue.add(currCommit.getSecondParent());
+            }
+            if (!currCommit.getParentHash().equals("")) {
+                ret.add(currCommit.getParentHash());
+                queue.add(currCommit.getParentHash());
+            }
         }
         return ret;
+    }
+
+    /**
+     * helper function for merge
+     * Given two branches, get the split point of the two. Implemented by making
+     * ancestors of two branches as a sorted map
+     * @param currBranch
+     * @param mergingParen
+     * @return hash of the splitpoint
+     */
+    static String splitPoint(String currBranch, List<String> mergingParen) {
+        TreeMap<Integer, String> anc = new TreeMap<>();
+        //traverse through current branch, record common ancestor if present in parenII
+        String hash = Utils.readContentsAsString(Utils.join(BRANCH, currBranch));
+        LinkedList<String> queue = new LinkedList<>();
+        int i = 0;
+        queue.add(hash);
+        while (!queue.isEmpty()) {
+            String commitHash = queue.pop();
+            Objects currCommit = Gitfile.getObjectsfromHash(commitHash);
+            if (!currCommit.getSecondParent().equals("")) {
+                queue.add(currCommit.getSecondParent());
+                if (mergingParen.contains(currCommit.getSecondParent())) {
+                    anc.put(i, currCommit.getSecondParent());
+                }
+            }
+            if (!currCommit.getParentHash().equals("")) {
+                queue.add(currCommit.getParentHash());
+                if (mergingParen.contains(currCommit.getParentHash())) {
+                    anc.put(i, currCommit.getParentHash());
+                }
+            }
+            ++i;
+        }
+    return anc.firstEntry().getValue();
     }
 
     /**
@@ -271,5 +313,30 @@ public class Gitfile{
         stageRM.indexFile.clear();
         Utils.writeObject(INDEX, stageEntries);
         Utils.writeObject(INDEX_RM, stageRM);
+    }
+
+    /**
+     * compare cwd and commit and output a list of untracked files
+     * @param commit
+     * @return
+     */
+    static LinkedList<String> untrackedFiles(Objects commit,
+                                              Objects staged,
+                                              Objects deleted) {
+        LinkedList<String> list = new LinkedList<>();
+        for (String file : Utils.plainFilenamesIn(CWD)) {
+            if (!commit.indexFile.containsKey(file)) {
+                list.add(file);
+            }
+        }
+        //must use itr instead of for range loop to remove
+        for (Iterator<String> it= list.iterator(); it.hasNext(); ) {
+            String file = it.next();
+            if (staged.indexFile.containsKey(file)
+                    || deleted.indexFile.containsKey(file)) {
+                it.remove();
+            }
+        }
+        return list;
     }
 }

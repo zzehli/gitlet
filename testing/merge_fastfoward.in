@@ -1,0 +1,26 @@
+# Check that we can check out a previous version.
+I prelude1.inc
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "version 1 of wug.txt"
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "version 2 of wug.txt"
+<<<
+> branch feature
+<<<
+> checkout feature
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "version 3 of wug.txt in feature"
+<<<
+> checkout master
+<<<
+> merge feature
+Current branch fast-forwarded.
+<<<

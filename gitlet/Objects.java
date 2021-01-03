@@ -6,7 +6,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 
 public class Objects implements Serializable {
     private String type;
@@ -70,6 +69,8 @@ public class Objects implements Serializable {
 
     public String getContent() { return content;}
 
+    public void setContent(String file) { content = file; }
+
     /**
      * Get the hash of the first parent,
      * later merged in parents are later down the line
@@ -79,11 +80,29 @@ public class Objects implements Serializable {
         if (parentHash.isEmpty()) {
             return "";
         }
-        return parentHash.getFirst(); }
+        return parentHash.getFirst();
+    }
+
+    public String getSecondParent() {
+        String content = "";
+        if (parentHash.size() == 2) {
+            content = parentHash.get(1);
+        }
+        return content;
+    }
 
     /**
+     * return true if the commit is a merge commit
+     * @return
+     */
+    public boolean isMergeCommit() {
+        if (parentHash.size() == 2)
+            return true;
+        else
+            return false;
+    }
+    /**
      * Return formated parent hash in the cases of merging commit
-     * TODO need a way to signify merg commit
      * @return
      */
     public String getMergeHash() {
@@ -106,6 +125,20 @@ public class Objects implements Serializable {
         time = Utils.timeStamp();
         parentHash = new LinkedList<>();
         parentHash.add(Gitfile.getHead());
+        this.msg = msg;
+        type = "commit";
+    }
+
+    /**
+     * make merge commit, need an extra parent head: givenHead
+     * @param msg commit message
+     * @param givenHead merged in branch head commit hash
+     */
+    public void makeMergeCommit(String msg, String givenHead) {
+        time = Utils.timeStamp();
+        parentHash = new LinkedList<>();
+        parentHash.add(Gitfile.getHead());
+        parentHash.add(givenHead);
         this.msg = msg;
         type = "commit";
     }

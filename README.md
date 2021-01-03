@@ -184,4 +184,38 @@ a1
 Three files are created, a commit object (9d91c), a tree for the sample folder (319d) and another tree for its subdirectory `data` folder (1637).
 
 ### Dec 30th
-I am working on branching and merging now. The development process has been smooth so far. I took two days off during the weekend. 
+I am working on branching and merging now. The development process has been smooth so far. I took two days off during weekend. 
+
+### Dec 31th
+Reflections:
+* Made a bad decision **not include hash in the git object(Objects) class**. I thought I am not supposed to change the object once 
+I made it, so there is no way to include hash in the private field. This is wrong, the serialized object does not necessarily need
+to correspond to the one given to the sha-1 function. Therefore, one only needs to hash the content, get the hash, put in the private 
+field and serialize the object and put into the file with hash as its file name.
+* Because of this, I constantly perform format changes from file to object and get object from hash. I wrote quite a few helper 
+function to the point that I sometime forgot what functionality I have implemented.
+* The real git index system is beyond my capacity. While the .git/index file might seem small if you `cat` the file. But 
+the file contains much information about your repo, if you performs [a binary/hex dump](https://mincong.io/2018/04/28/git-index/).
+* Besides the index file, I omitted the log files as well. These are readable files that contains the branch commit/HEAD pointer
+information to help keeping track of the commit/branching histories.
+* Merging(for two branches) is more complicated than I thought. An important step is **finding the latest common ancestor/split point**. Even for two
+branches, the fact that there might be merging commits in the past means one need to compare few potential candidates as ancestor and select the nearest one.
+However, this information (distance from the current commit) cannot be stored beforehand. Each time one wants to find the split point, in order to compare
+the candidates, one need to traverse them and calculate the steps. Real Git includes "MERGE_HEAD" tag to merge commits, 
+but I did not do so. I am not sure how this can simplify the process since branching names might have changed and there is 
+no way to keep track of whether the past merge took place in the current branch besides traversing again.
+
+### Jan 2nd 
+An important aspect of the project is **caching**. In my project design, most information is stored in the `Objects` class, which include 
+blob and commit objects. The program starts from `main` and gets directed to corresponding functionalities in `Command` class. Each git functionality
+starts by reading git objects from the `.gitlet/objects` folder, which stores git objects, by its hash. Many helper methods can be shared 
+among different functionalities, such as update fatch git objects, compare different commits, staging area. These helper functions are stored in 
+`Gitfile` class, which consists of only static functions. To cache information, git objects should be stored in the `Command` class and pass necessary information
+to the helper functions, in stead of read files in helper functions. 
+
+Since I do not include hash in the git object, it is not easy to fetch object hash from object file itself. So I was not 
+clear how best to pass information between helper functions. While it is most convenient to pass hash and read object in the helpfer funtion, 
+but I realize in some `Command` methods, I am reading same files in the parent function and helpfer function.
+
+
+

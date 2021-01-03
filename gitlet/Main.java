@@ -1,12 +1,5 @@
 package gitlet;
 
-import java.io.File;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-
 /** Driver class for Gitlet, the tiny stupid version-control system.
  *  @author
  */
@@ -66,7 +59,6 @@ public class Main {
                 break;
 
             case "checkout":
-                //TODO slash slash
                 if (args.length == 4) {
                     Command.checkoutPastFile(args[1], args[3]);
                 }
@@ -79,6 +71,16 @@ public class Main {
                 else {
                     Utils.exitWithError("Not valid input.");
                 }
+                break;
+
+            case "merge" :
+                validateNumArgs("merge", args, 2);
+                Command.merge(args[1]);
+                break;
+
+            case "rebase":
+                validateNumArgs("rebase", args, 2);
+                //Command.rebase(args[1]);
                 break;
 
             default:

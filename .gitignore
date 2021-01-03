@@ -5,6 +5,7 @@ __pycache__
 
 ### Project Specific ###
 .gitlet/
+testing/samples/
 
 ### Java ###
 *.class
