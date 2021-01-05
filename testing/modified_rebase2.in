@@ -1,0 +1,64 @@
+# reverse the modified_rebase.in branch
+I prelude1.inc
++ f.txt wug.txt
++ g.txt notwug.txt
+> add g.txt
+<<<
+> add f.txt
+<<<
+> commit "Two files"
+<<<
+> branch other
+<<<
+> checkout other
+<<<
++ k.txt wug3.txt
+> add k.txt
+<<<
++ h.txt wug2.txt
+> add h.txt
+<<<
+> commit "Add k.txt and h.txt to branch other"
+<<<
++ f.txt notwug.txt
+> add f.txt
+<<<
+> commit "Modified f.txt"
+<<<
+> checkout master
+<<<
++ h.txt conflict3.txt
+> add h.txt
+<<<
+> rm g.txt
+<<<
+> commit "Remove g.txt and add h.txt"
+<<<
+> rebase other
+<<<
+> log
+===
+${COMMIT_HEAD}
+Remove g.txt and add h.txt
+
+===
+${COMMIT_HEAD}
+Modified f.txt
+
+===
+${COMMIT_HEAD}
+Add k.txt and h.txt to branch other
+
+===
+${COMMIT_HEAD}
+Two files
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+= h.txt conflict3.txt
+= f.txt notwug.txt
+= k.txt wug3.txt
+* g.txt

@@ -1,0 +1,61 @@
+# rebase with all current branch files preserved (no modification necessary)
+I prelude1.inc
++ f.txt wug.txt
++ g.txt notwug.txt
+> add g.txt
+<<<
+> add f.txt
+<<<
+> commit "Two files"
+<<<
+> branch other
+<<<
+> checkout other
+<<<
++ k.txt wug3.txt
+> add k.txt
+<<<
++ h.txt wug3.txt
+> add h.txt
+<<<
+> commit "Add k.txt and h.txt to branch other"
+<<<
+> checkout master
+<<<
++ h.txt wug2.txt
++ h.txt conflict3.txt
+> add h.txt
+<<<
+> commit "Add h.txt"
+<<<
+> checkout other
+<<<
+> rebase master
+<<<
+> log
+===
+${COMMIT_HEAD}
+Add k.txt and h.txt to branch other
+
+===
+${COMMIT_HEAD}
+Add h.txt
+
+===
+${COMMIT_HEAD}
+Two files
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+> checkout master
+<<<
+> merge other
+Current branch fast-forwarded.
+<<<
+= h.txt wug3.txt
+= f.txt wug.txt
+= g.txt notwug.txt
+= k.txt wug3.txt

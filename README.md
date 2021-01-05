@@ -1,5 +1,5 @@
 # gitlet
-This is an independant implementation of a mini version of Git. The project skeleton is provided by Berkeley CS61B course
+This is an independant implementation of a mini version of Git. The project skeleton is provided by Berkeley [CS61B](https://cs61bl.org/su20/projects/gitlet/#miscellaneous-things-to-know-about-gitlet) course
 ## Define terms:
 **working directory**: directory tracked by git/with the dot git folder
 ## Design
@@ -57,7 +57,7 @@ The basic design of gitlet involves two parts, set up git objects and work with 
 ### Day 1: Dec 20th
 Set up the project as an stand-alone repo and started the design process. The decision to extract the project from the CS61B course repo means I need to fix git issues and directory references. I added the submodule to the project folder. Dealing with submodules allow me to practice with the remote repos, which I will probably implement if the project goes well. Another problem was fixing the python test suit that contains the default library directory for the course. In the evening, I spent time reading the project prompt and read materials about git implementations. I am surprised by the number of expositions on this subject matter. There are quite a few git implementations and helpful expositories as well as conference talks. In particular, I figured out an important question: **what actually are the snapshots of the files when you add/commit?** For text files, simply save the whole file as a string, which is in turn saved to `.git/object` folder when commited. This a lot more simpler/unsophisticated than I have imagined. However, this only applies to txt file. This is really not much different from copy and paste. The disk space required for other format would be considerably larger if other file formats are involved. 
 
-The [naive version control workflow](http://git.github.io/git-reference/) provided by the github team illustrate what Github really is
+The [naive version control workflow](http://git.github.io/git-reference/) provided by the github team illustrate what Git really is
 ```
 cp -R project project.bak
 (do it many times, now you need more precise names)

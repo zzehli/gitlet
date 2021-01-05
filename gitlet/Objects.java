@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 
 public class Objects implements Serializable {
     private String type;
@@ -59,6 +58,25 @@ public class Objects implements Serializable {
         }
     }
 
+    /**
+     * Copy constructor for rebase; copy the blob index from given git commit and
+     * make new date
+     * @param other
+     */
+    public Objects(Objects other) {
+        time = Utils.timeStamp();
+        //make a deep copy of the given file
+        parentHash = new LinkedList<>();
+        for (String i : other.parentHash)
+            parentHash.add(i);
+        indexFile = new HashMap<>();
+        for (Map.Entry<String, Gitindex> entry : other.indexFile.entrySet()) {
+            indexFile.put(entry.getKey(), new Gitindex(entry.getValue()));
+        }
+        this.msg = other.msg;
+        type = "commit";
+    }
+
     public String getType() {
         return type;
     }
@@ -70,6 +88,14 @@ public class Objects implements Serializable {
     public String getContent() { return content;}
 
     public void setContent(String file) { content = file; }
+
+    /**
+     * replace the first parent
+     * @param i
+     */
+    public void setParentHash(String i) {
+        parentHash.set(0, i);
+    }
 
     /**
      * Get the hash of the first parent,
@@ -190,4 +216,57 @@ public class Objects implements Serializable {
         System.out.println(content);
     }
 
+    /**
+     * Update replay branch by comparing to split point and head of given branch
+     * replace unmodified blob with modified blobs in the given branch
+     * @param splitCommit
+     * @param givenCommit
+     * @return
+     */
+    public LinkedList<String> rebaseUpdate(Objects splitCommit, Objects givenCommit) {
+        LinkedList<String> update = new LinkedList<>();
+        Iterator itr = splitCommit.indexFile.keySet().iterator();
+        while(itr.hasNext()) {
+            //case1 present in all three, modified in given branch
+            String i = (String) itr.next();
+            if (!indexFile.containsKey(i))
+                continue;
+            if (splitCommit.indexFile.containsKey(i) &&
+                    givenCommit.indexFile.containsKey(i) &&
+                    this.indexFile.get(i).verCompare(splitCommit.indexFile.get(i)) &&
+                    !this.indexFile.get(i).verCompare(givenCommit.indexFile.get(i))
+                    ) {
+                indexFile.put(i, givenCommit.indexFile.get(i));
+                Gitfile.updateRepoFile(Utils.join(i), givenCommit.indexFile.get(i).getSha1Hash());
+                update.add(i);
+            //case2 deleted in given, not modified in current branch
+            } else if (splitCommit.indexFile.containsKey(i) &&
+                    !givenCommit.indexFile.containsKey(i) &&
+                    indexFile.get(i).verCompare(splitCommit.indexFile.get(i))) {
+                indexFile.remove(i);
+                Utils.restrictedDelete(i);
+                update.add(i);
+            }
+            //case3 modification in current branch takes place later than given
+            else if (splitCommit.indexFile.containsKey(i) &&
+                    givenCommit.indexFile.containsKey(i) &&
+                    !this.indexFile.get(i).verCompare(splitCommit.indexFile.get(i)) &&
+                    !this.indexFile.get(i).verCompare(givenCommit.indexFile.get(i)))
+            {
+                Gitfile.updateRepoFile(Utils.join(i), this.indexFile.get(i).getSha1Hash());
+                update.add(i);
+            }
+        }
+
+        for (String i : givenCommit.indexFile.keySet()){
+            //case4 only present in given
+            if (!splitCommit.indexFile.containsKey(i) &&
+                !indexFile.containsKey(i)) {
+                indexFile.put(i, splitCommit.indexFile.get(i));
+                Gitfile.updateRepoFile(Utils.join(i), givenCommit.indexFile.get(i).getSha1Hash());
+                update.add(i);
+            }
+        }
+        return update;
+    }
 }

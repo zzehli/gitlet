@@ -1,0 +1,119 @@
+@startuml
+class gitlet.Gitindex {
+- String filename
+- String sha1Hash
++ String getSha1Hash()
++ String getFilename()
++ int hashCode()
++ boolean equals(Object)
++ boolean verCompare(Gitindex)
+}
+class gitlet.Command {
+~ {static} void init()
+~ {static} void add(String)
+~ {static} void commit(String)
+~ {static} void rm(String)
+~ {static} void log()
+~ {static} void status()
+~ {static} void reset(String)
+~ {static} void branch(String)
+~ {static} void checkoutPastFile(String,String)
+~ {static} void checkoutHeadFile(String)
+~ {static} void checkoutBranch(String)
+~ {static} void mergeCheck(String)
+~ {static} void merge(String)
+~ {static} void mergeCommit(Objects,String,String)
+~ {static} void printMergeConf(LinkedList<String>,Objects,Objects)
+~ {static} void rebase(String)
+}
+class gitlet.Objects {
+- String type
+- String content
+- String CwdName
+- String msg
+- String time
+- LinkedList<String> parentHash
++ HashMap<String,Gitindex> indexFile
++ String getType()
++ String getCwdName()
++ String getContent()
++ void setContent(String)
++ void setParentHash(String)
++ String getParentHash()
++ String getSecondParent()
++ boolean isMergeCommit()
++ String getMergeHash()
++ String getTime()
++ String getMsg()
++ void makeCommit(String)
++ void makeMergeCommit(String,String)
++ void putEntryToDict(String,String)
++ void updateDictDiff(Objects,Objects)
++ void printDict()
++ LinkedList<String> rebaseUpdate(Objects,Objects)
+}
+class gitlet.Utils {
+~ {static} int UID_LENGTH
+- {static} FilenameFilter PLAIN_FILES
+~ {static} String timeStamp()
+~ {static} String hash(Serializable)
+~ {static} String sha1(Object)
+~ {static} String sha1(List<Object>)
+~ {static} boolean restrictedDelete(File)
+~ {static} boolean restrictedDelete(String)
+~ {static} byte[] readContents(File)
+~ {static} String readContentsAsString(File)
++ {static} void exitWithError(String)
+~ {static} void writeContents(File,Object)
+~ {static} T readObject(File,Class<T>)
+~ {static} void writeObject(File,Serializable)
+~ {static} List<String> plainFilenamesIn(File)
+~ {static} List<String> plainFilenamesIn(String)
+~ {static} File join(String,String)
+~ {static} File join(File,String)
+~ {static} byte[] serialize(Serializable)
+~ {static} GitletException error(String,Object)
+~ {static} void message(String,Object)
+}
+class gitlet.Gitfile {
+~ {static} File OBJECTS
+~ {static} File INDEX
+~ {static} File INDEX_RM
+~ {static} File LOCAL_HEAD
+~ {static} File HEAD
+~ {static} File BRANCH
+~ {static} File CWD
+~ {static} String ST_RM
+~ {static} void setDirectory()
+~ {static} String writeGitObject(Objects)
+~ {static} void writeHead(String)
+~ {static} String getHead()
+~ {static} boolean writeStagedToIndex(String,String)
+~ {static} boolean updateIndexRemoval(Objects)
+~ {static} File getObjectsAsFile(String)
+~ {static} Objects getObjectsfromHash(String)
+~ {static} String getHashHead(String)
+~ {static} String getHashBody(String)
+~ {static} Objects getCurrentCommit()
+~ {static} String getBranchHead(String)
+~ {static} String currentBranch()
+~ {static} void updateBranchHead(String,String)
+~ {static} List<String> pastCommits(String)
+~ {static} String splitPoint(String,List<String>)
+~ {static} void updateRepoFile(File,String)
+~ {static} void clearStage(Objects,Objects)
+~ {static} LinkedList<String> untrackedFiles(Objects,Objects,Objects)
+~ {static} LinkedList<String> modifiedFiles(Objects,Objects,Objects)
+}
+class gitlet.Main {
++ {static} void main(String[])
++ {static} void validateNumArgs(String,String[],int)
+}
+class gitlet.GitletException {
+}
+
+
+java.io.Serializable <|.. gitlet.Gitindex
+java.io.Serializable <|.. gitlet.Objects
+gitlet.RuntimeException <|-- gitlet.GitletException
+@enduml

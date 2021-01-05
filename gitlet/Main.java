@@ -58,6 +58,11 @@ public class Main {
                 Command.branch(args[1]);
                 break;
 
+            case "reset":
+                validateNumArgs("branch", args, 2);
+                Command.reset(args[1]);
+                break;
+
             case "checkout":
                 if (args.length == 4) {
                     Command.checkoutPastFile(args[1], args[3]);
@@ -80,7 +85,7 @@ public class Main {
 
             case "rebase":
                 validateNumArgs("rebase", args, 2);
-                //Command.rebase(args[1]);
+                Command.rebase(args[1]);
                 break;
 
             default:

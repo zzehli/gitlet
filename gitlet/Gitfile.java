@@ -23,6 +23,8 @@ public class Gitfile {
         LOCAL_HEAD.mkdirs();
         Objects index = new Objects("index");
         Utils.writeObject(INDEX_RM, index);
+        Objects fileList = new Objects("index");
+        Utils.writeObject(INDEX, fileList);
         Utils.writeContents(HEAD, "master");
     }
 
@@ -31,7 +33,7 @@ public class Gitfile {
      *
      * @param GitObject
      */
-    static void writeGitObject(Objects GitObject) {
+    static String writeGitObject(Objects GitObject) {
         String hash = Utils.hash(GitObject);
         Utils.join(OBJECTS,
                 getHashHead(hash)).mkdir();
@@ -50,6 +52,7 @@ public class Gitfile {
                 Utils.writeObject(file, GitObject);
             }
         }
+        return hash;
     }
 
     /**
@@ -81,31 +84,21 @@ public class Gitfile {
      */
     static boolean writeStagedToIndex(String hash, String filename) {
         Objects fileList;
-        if (INDEX.exists()) {
-            fileList = Utils.readObject(INDEX, Objects.class);
-            if (fileList.indexFile.containsKey(filename)) {
-                //if dictionary contains the same file, compare hashcode
-                //same as last commit/staged already
-                if (hash == fileList.indexFile.get(filename).getSha1Hash()) {
-                    //this version and previous version in staging area are the same
-                    //don't stage
-                    return false;
-                }
-                //TODO check for commited cases, must look for commit folder;
-                //case: commited, modified, added again (replace commit entry in INDEX), need to remove from INDEX
-
+        fileList = Utils.readObject(INDEX, Objects.class);
+        if (fileList.indexFile.containsKey(filename)) {
+            //if dictionary contains the same file, compare hashcode
+            //same as last commit/staged already
+            if (hash == fileList.indexFile.get(filename).getSha1Hash()) {
+                //this version and previous version in staging area are the same
+                //don't stage
+                return false;
             }
-            //write update to file
-            Gitindex update = new Gitindex(hash, filename);
-            fileList.indexFile.put(filename, update);
-
-            //fileList.printDict();
-        } else {
-            //if INDEX doesn't exist, put the entry as the first index
-            fileList = new Objects("index");
-            fileList.putEntryToDict(hash, filename);
         }
+        //write update to file
+        Gitindex update = new Gitindex(hash, filename);
+        fileList.indexFile.put(filename, update);
 
+        //fileList.printDict();
         Utils.writeObject(INDEX, fileList);
         return true;
     }
@@ -306,9 +299,7 @@ public class Gitfile {
     /**
      * clear staging area: INDEX and INDEX_RM
      */
-    static void clearStage() {
-        Objects stageEntries = Utils.readObject(INDEX, Objects.class);
-        Objects stageRM = Utils.readObject(INDEX_RM, Objects.class);
+    static void clearStage(Objects stageEntries, Objects stageRM) {
         stageEntries.indexFile.clear();
         stageRM.indexFile.clear();
         Utils.writeObject(INDEX, stageEntries);
@@ -338,5 +329,45 @@ public class Gitfile {
             }
         }
         return list;
+    }
+
+    /**
+     * survey the current working directory to output a list of untracked but
+     * modified or deleted but not staged files for log command
+     * @param commit current commit to be compared
+     * @param staged staged files
+     * @param unstage staged for removal files
+     * @return list of modified files
+     */
+    static LinkedList<String> modifiedFiles(Objects commit,
+                                            Objects staged,
+                                            Objects unstage) {
+        LinkedList<String> modified = new LinkedList<>();
+        for (String i : staged.indexFile.keySet()) {
+            System.out.println(i);
+            String sha1 = staged.indexFile.get(i).getSha1Hash();
+            String content = Utils.readContentsAsString(Utils.join(i));
+            if (!Utils.hash(new Objects(content, i)).equals(sha1)) {
+                modified.add(i + " (modified)");
+            }
+        }
+        for (String i : commit.indexFile.keySet()) {
+            if (staged.indexFile.containsKey(i))
+                continue;
+            String sha1 = commit.indexFile.get(i).getSha1Hash();
+            File cwdVer = Utils.join(i);
+            if (!cwdVer.exists()) {
+                modified.add(i + " (deleted)");
+                continue;
+            }
+            String content = Utils.readContentsAsString(cwdVer);
+            if (!Utils.hash(new Objects(content, i)).equals(sha1))
+                modified.add(i + " (modified)");
+        }
+        for (String i : unstage.indexFile.keySet()) {
+            if (modified.contains(i + " (deleted)"))
+                modified.remove(i + " (deleted)");
+        }
+    return modified;
     }
 }

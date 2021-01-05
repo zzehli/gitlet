@@ -18,6 +18,11 @@ public class Gitindex implements Serializable {
         sha1Hash = hash;
     }
 
+    public Gitindex(Gitindex other) {
+        this.filename = other.filename;
+        this.sha1Hash = other.sha1Hash;
+    }
+
     public String getSha1Hash() {
         return sha1Hash;
     }
@@ -36,6 +41,17 @@ public class Gitindex implements Serializable {
             return (((Gitindex) obj).filename.hashCode() == this.filename.hashCode());
         }
         return false;
+    }
+
+    /**
+     * compare if two Gitindex is the same
+     * this differs from equal since equals would replace old version of a blob with
+     * a new version
+     * @param other
+     * @return
+     */
+    public boolean verCompare(Gitindex other) {
+        return sha1Hash.equals(other.sha1Hash);
     }
 
 
