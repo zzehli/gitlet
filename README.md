@@ -1,7 +1,42 @@
 # gitlet
-This is an independant implementation of a mini version of Git. The project skeleton is provided by Berkeley [CS61B](https://cs61bl.org/su20/projects/gitlet/#miscellaneous-things-to-know-about-gitlet) course
-## Define terms:
-**working directory**: directory tracked by git/with the dot git folder
+This is an independant implementation of a mini version of Git. The project skeleton is provided by Berkeley [CS61B](https://cs61bl.org/su20/projects/gitlet/) course.
+I implemented the `Main`, `Gitfile`, `Command`, `Objects` and `Gitindex`. The `Utils` class and python testing script is provided
+by the course. I wrote some test cases in the `testing` directory.
+
+## Run
+
+In the outer gitlet folder, compile the program with: 
+```
+javac ./*.java
+```
+
+Once you compiled, you can use run various git command with the following call
+```
+java gitlet.Main [command]
+```
+
+Be sure to `init` your directory before other commands.
+
+supported commands are:
+```
+init
+add [file name] 
+commit [message]
+rm [file name]
+log
+status
+branch [branch name]
+checkout -- [filename]
+checkout [commit id] -- [file name]
+checkout [branch name]
+reset [commit id]
+merge [branch name]
+rebase [branch name]
+```
+
+The functionalities are simplified versions of the real Git. For example, the `add` command can only add one file at a time.
+The detailed behaviors of the commands are described in the [assignment](https://cs61bl.org/su20/projects/gitlet/) page.
+
 ## Design
 
 The basic design of gitlet involves two parts, set up git objects and work with branches.
