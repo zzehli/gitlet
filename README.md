@@ -1,4 +1,5 @@
 # gitlet
+<<<<<<< HEAD
 This is an independant implementation of a mini version of Git. The project skeleton is provided by Berkeley [CS61B](https://cs61bl.org/su20/projects/gitlet/) course.
 I implemented the `Main`, `Gitfile`, `Command`, `Objects` and `Gitindex`. The `Utils` class and python testing script is provided
 by the course. I wrote some test cases in the `testing` directory.
@@ -40,54 +41,9 @@ The detailed behaviors of the commands are described in the [assignment](https:/
 ## Design
 
 The basic design of gitlet involves two parts, set up git objects and work with branches.
-
-| Class: gitApi | Comments |
-| ----- |-----|
-| gitApi() | constructor, read the current commit from the file and work from there |
-| init() ||
-| add(String filename) |create blobs but don't save to file|
-| rm (String filename) | unstage files |
-| commit(String message) | compare blobs and save new ones to file |
-| log () ||
-| ... ||
-| private String head ||
-| private String master ||
-| private HashMap<String, String> stage  | from names to hashcode|
-| private HashMap<String, String> current_tree | as above |
-
-| Class: object | Comments |
-| ----- |-----|
-| object(String content, String type) |constructor that create a blob or commit object, gather content for blob and gather blobs for commit|
-| String typeOf(String hash)| return wether the given hash refers to blob or commits|
-| findParentCommit(String hash) | take the hash of the current commit and find its parent |
-| boolean compareBlob() |look up the file in current_tree and compare the hashcode to determine if the version in the tracked file is the same as the current blob|
-| makeCommit() | call write commit |
-|...||
-| private String hash |
-| private String serialContent ||
-| private String type ||
-| private transient HashMap<String, String> blobs |for quick acess, reduce reading time|
-
-| Class: File | Comments |
-| ---- | ------|
-| writeHead(String loc) | record the current head in the the HEAD file |
-| boolean writeBlob(object blob) | create blob file and write the serialized content, note that commits in gitlet combine tree objects as transient field|
-| boolean writeCommit(object object) | create commit file in the .git/object folder, then take its blobs, current time and parrent (current head) commit and serialize it before hash; name it as SHA-1 hash  |
-| initSetUp() | set up .git folder, .git/object folder, .git/HEAD file, git/index file, git/branches folder |
-| object getBlob(String hash) |this is necessary since commits share blobs(?)|
-| object getCommit(String hash) ||
-| boolean stageFile() | write staged file for later commits; it can be overriden by new add if the same file changed | 
-
-| File getCommit(String hash) | look fore the commit folder with the hash code as file name |
-| String checkDotGit() | check if the current directory is initialized by gitlet |
-
-| Class: Utils (ignore provided functions) | Comments |
-| ---- | ----- |
-| String getTime() | for timestamp objects at the time of adding |
-| String getFileName() | for easy access to commits | 
+![alt text](https://github.com/zzehli/gitlet/blob/main/test.png)
 
 
-| Class: 
 ## Development Journal
 ### Day 1: Dec 20th
 Set up the project as an stand-alone repo and started the design process. The decision to extract the project from the CS61B course repo means I need to fix git issues and directory references. I added the submodule to the project folder. Dealing with submodules allow me to practice with the remote repos, which I will probably implement if the project goes well. Another problem was fixing the python test suit that contains the default library directory for the course. In the evening, I spent time reading the project prompt and read materials about git implementations. I am surprised by the number of expositions on this subject matter. There are quite a few git implementations and helpful expositories as well as conference talks. In particular, I figured out an important question: **what actually are the snapshots of the files when you add/commit?** For text files, simply save the whole file as a string, which is in turn saved to `.git/object` folder when commited. This a lot more simpler/unsophisticated than I have imagined. However, this only applies to txt file. This is really not much different from copy and paste. The disk space required for other format would be considerably larger if other file formats are involved. 
@@ -251,6 +207,3 @@ to the helper functions, in stead of read files in helper functions.
 Since I do not include hash in the git object, it is not easy to fetch object hash from object file itself. So I was not 
 clear how best to pass information between helper functions. While it is most convenient to pass hash and read object in the helpfer funtion, 
 but I realize in some `Command` methods, I am reading same files in the parent function and helpfer function.
-
-
-
