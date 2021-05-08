@@ -8,7 +8,7 @@ by the course. I wrote some test cases in the `testing` directory.
 
 In the outer gitlet folder, compile the program with: 
 ```
-javac ./*.java
+javac gitlet/*.java
 ```
 
 Once you compiled, you can use run various git command with the following call
