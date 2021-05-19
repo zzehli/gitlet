@@ -1,6 +1,6 @@
 # gitlet
 
-This is an independant implementation of a mini version of Git. The project skeleton is provided by Berkeley [CS61B](https://cs61bl.org/su20/projects/gitlet/) course.
+This is an independant implementation of a mini version of Git. The project is based on an assignment in the Berkeley [CS61B](https://cs61bl.org/su20/projects/gitlet/) course.
 I implemented the `Main`, `Gitfile`, `Command`, `Objects` and `Gitindex`. The `Utils` class and python testing script is provided
 by the course. I wrote some test cases in the `testing` directory.
 
