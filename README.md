@@ -1,7 +1,7 @@
 # gitlet
 
-This is an independant implementation of a mini version of Git. The project is based on an assignment in the Berkeley [CS61B](https://cs61bl.org/su20/projects/gitlet/) course.
-I implemented the `Main`, `Gitfile`, `Command`, `Objects` and `Gitindex`. A few functions in the `Utils` class and the python testing suit is provided by the course.
+An independent implementation of the version control system Git in Java. Gitlet supports most of Git's local functionalities: add, commit, checkout, log, as well as branching actions including merge and rebase.
+
 ## Run
 
 In the outer gitlet folder, compile the program with: 
